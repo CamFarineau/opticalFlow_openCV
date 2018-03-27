@@ -23,9 +23,12 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    //Parameters for the calcOpticalFlowPyrLK function
     TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS,10,0.03);
     Size  winSize(15,15);
     const int max = 20;
+
+    // Parameter for the goodFeaturesToTrack function
     int maxLevel = 5;
 
     Mat gray, prevGray, image, frame, mask;
@@ -41,10 +44,22 @@ int main(int argc, char** argv)
     gray.copyTo(prevGray);
 
     // Find corners in the first frame
+    int i = 0, k = 0;
+
+    // Others parameters are hard-coded in the call
     goodFeaturesToTrack(gray, points[1], max, 0.01, 10, Mat(), 3, 3, 0, 0.04);
 
-    namedWindow( "test", 1 );
+    // TO GET THE IMAGE OF THE DETECTED FEATURES
+    // for( i = k = 0; i < points[1].size(); i++ )
+    // {
+    //         points[1][k++] = points[1][i];
+    //         //std::cout<<blue_color.at(i)<<std::endl;
+    //         circle( image, points[1][i], 3, Scalar(0,255,0), -1, 8);
+    //         //points[1].resize(k);
+    // }
 
+    // namedWindow( "test", 1 );
+    // imwrite( "/home/camille/work/opticalFlow_test/opticalFlow_openCV/data/featuresSelection/qualityLevel09.jpg", image );
     
 
     std::swap(points[1], points[0]);
@@ -75,7 +90,7 @@ int main(int argc, char** argv)
         vector<float> err;
         calcOpticalFlowPyrLK(prevGray, gray, points[0], points[1], status, err, winSize, maxLevel, termcrit, 0, 0.001);
 
-        int i = 0, k = 0;
+        
         // std::cout<<"nb points: "<<points[1].size()<<std::endl;
         // std::cout<<"points: "<<points[1]<<std::endl;
         for( i = k = 0; i < points[1].size(); i++ )
@@ -107,7 +122,7 @@ int main(int argc, char** argv)
     waitKey(10);
 
 
-    imwrite( "/home/camille/work/opticalFlow_test/opticalFlow_openCV/data/maxLevel5.jpg", mask );
+    imwrite( "/home/camille/work/opticalFlow_test/opticalFlow_openCV/data/termCritEpsilon9.jpg", mask );
 
 
     vid.release();
