@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 
     //Parameters for the calcOpticalFlowPyrLK function
     TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS,10,0.03);
-    Size  winSize(15,15);
+    Size  winSize(100,100);
     const int max = 20;
 
     // Parameter for the goodFeaturesToTrack function
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
         }
         //std::cout<<"Points[1]: "<<points[1]<<std::endl;
         imshow("test", image);
-        char c = (char)waitKey(10);
+        char c = (char)waitKey(100);
         if( c == 27 )
             break;
 
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
     waitKey(10);
 
 
-    imwrite( "/home/camille/work/opticalFlow_test/opticalFlow_openCV/data/termCritEpsilon9.jpg", mask );
+    imwrite( "/home/camille/work/opticalFlow_test/opticalFlow_openCV/data/winSize30x30.jpg", mask );
 
 
     vid.release();
