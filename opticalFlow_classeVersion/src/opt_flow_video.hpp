@@ -1,11 +1,14 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/videoio.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <iostream>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string> 
 
 using namespace std;
 using namespace cv;
@@ -21,20 +24,22 @@ class OptFlowVideo{
         // Default constructor
         OptFlowVideo();
         // Constructor with the filename as arguments can be useful
-        OptFlowVideo(string filename_temp);
+        OptFlowVideo(string filepath_temp);
 
         // Function to get (write in a file) the first frame of the video with the important features that will be tracked
         void write_image_with_init_features(bool show_output = false);
         // Function to get (write in a file) the first frame of the video with the optical flow of each of the features
         void write_image_with_optical_flow(bool show_output = false);
         // Function to get (write in a file) the same video with vectors representing the optical flow of each features at each frame
-        void write_vector_video(bool show_output = false, int fps = 25);
+        void write_vector_video(bool write_json_vector = true, bool show_output = false, int fps = 25);
+        // Function to write in a JSON file the vectors of each features at each frames
+        void write_vector_json(); 
         // Function to release the video (deallocate memory)
         void release_video();
 
-        // {get, set} for filename
-        void set_filename(string filename_temp);
-        string get_filename(){return filename_;};
+        // {get, set} for filepath
+        void set_filepath(string filepath_temp);
+        string get_filepath(){return filepath_;};
 
         // {get, set} for max_features
         void set_max_features(int max_features_temp){max_features_ = max_features_temp;};
@@ -67,7 +72,8 @@ class OptFlowVideo{
     private:
 
         //Video attributs:
-        cv::String filename_;
+        string filepath_;
+        string filename_;
         // Boolean to know if the video change (in case of true the new video will be loaded in order to proces it)
         bool change_name_;
         // The video itself

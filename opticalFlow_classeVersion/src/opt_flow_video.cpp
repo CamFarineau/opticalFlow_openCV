@@ -4,7 +4,7 @@
 // Each parameters can be set separately by the user
 OptFlowVideo::OptFlowVideo()
 {
-    this->filename_ = "";
+    this->filepath_ = "";
     this->change_name_ = false;
     this->max_features_ = 100;
     this->quality_level_ = 0.01;
@@ -16,9 +16,9 @@ OptFlowVideo::OptFlowVideo()
     this->term_crit_ = TermCriteria(TermCriteria::COUNT|TermCriteria::EPS,10,0.03);
 }
 
-OptFlowVideo::OptFlowVideo(string filename_temp)
+OptFlowVideo::OptFlowVideo(string filepath_temp)
 {
-    set_filename(filename_temp);
+    set_filepath(filepath_temp);
     this->change_name_ = true;
     this->max_features_ = 100;
     this->quality_level_ = 0.01;
@@ -30,9 +30,9 @@ OptFlowVideo::OptFlowVideo(string filename_temp)
     this->term_crit_ = TermCriteria(TermCriteria::COUNT|TermCriteria::EPS,10,0.03);
 }
 
-void OptFlowVideo::set_filename(string filename_temp)
+void OptFlowVideo::set_filepath(string filepath_temp)
 {
-    boost::filesystem::path video_path(filename_temp);
+    boost::filesystem::path video_path(filepath_temp);
     boost::filesystem::path current_path(video_path);
     current_path.remove_filename();
     this->path_to_data_folder_ = current_path.string() + "/" + video_path.stem().string();
@@ -41,7 +41,8 @@ void OptFlowVideo::set_filename(string filename_temp)
 
     this->path_to_data_folder_ += "/";
 
-    this->filename_ = filename_temp;
+    this->filepath_ = filepath_temp;
+    this->filename_ = video_path.stem().string();
     this->change_name_ = true;
     
 }
@@ -54,7 +55,7 @@ int OptFlowVideo::load_video()
 {
     if(!this->video_.isOpened() || this->change_name_)
     {
-        this->video_.open(this->filename_);
+        this->video_.open(this->filepath_);
         this->change_name_ = false;
         // Verify if the video is correctly loaded
         if (!this->video_.isOpened()) {
@@ -137,8 +138,8 @@ void OptFlowVideo::write_image_with_init_features(bool show_output)
     }
 
     // Write in the correct file the image
-    imwrite( this->path_to_data_folder_ + "initFeatures.jpg", first_frame_temp );
-    std::cout<<"First frame with init features has been written at : "<<this->path_to_data_folder_<<"initFeatures.jpg"<<std::endl<<std::endl;
+    imwrite(this->path_to_data_folder_ + this->filename_ + "_init_features.jpg", first_frame_temp );
+    std::cout<<"First frame with init features has been written at : "<<this->path_to_data_folder_ + this->filename_ + "_init_features.jpg"<<std::endl<<std::endl;
 }
 
 /* Function to get the first frame of the video with the optical flow of each features (public)
@@ -233,23 +234,23 @@ void OptFlowVideo::write_image_with_optical_flow(bool show_output)
     }
 
     // Write the first frame with optical flow for each features in the correct file
-    imwrite( this->path_to_data_folder_ + "optFlow.jpg", first_frame_temp );
+    imwrite(this->path_to_data_folder_ + this->filename_ + "_opt_flow.jpg", first_frame_temp );
 
     // Reload the video (it's now at the end of the video so it need to be reloaded if the user wants to use another function right after this one)
-    this->video_.open(this->filename_);
+    this->video_.open(this->filepath_);
     if (!this->video_.isOpened()) {
         std::cerr << "Failed to open the video device, video file or image sequence!\n" << std::endl;
         return;
     }
 
-    std::cout<<"First frame with optical flow (LK) has been written at : "<<this->path_to_data_folder_<<"optFlow.jpg"<<std::endl<<std::endl;
+    std::cout<<"First frame with optical flow (LK) has been written at : "<<this->path_to_data_folder_ + this->filename_ + "_opt_flow.jpg"<<std::endl<<std::endl;
 }
 
 /* Function to get the video with the vectors reprensenting the optical flow of each features at each frame (public)
 *  Will create a video file at the location chosen by the user
 *  Return:
 */
-void OptFlowVideo::write_vector_video(bool show_output, int fps)
+void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, int fps)
 {
     // Verify if the video is loaded (or changed) or if the features has been already found
     if(this->init_features_.empty() || this->change_name_)
@@ -270,7 +271,7 @@ void OptFlowVideo::write_vector_video(bool show_output, int fps)
     // Tab of vector of Points2f : one for the previous location of the features, one for the newest
     vector<Point2f> points[2];
     // Points representing the vector between the new location of a feature and the old location
-    Point2f vector_flow;
+    vector<Point2f> vector_flow(this->max_features_,Point2f(0.0,0.0)) ;
     // Get the location of the init features
     points[0] = this->init_features_;
 
@@ -282,13 +283,15 @@ void OptFlowVideo::write_vector_video(bool show_output, int fps)
     // Create a VideoWriter with the correct parameters and outputPath
     VideoWriter writer;
     int codec = CV_FOURCC('M', 'J', 'P', 'G');  // select desired codec (must be available at runtime)
-    writer.open(this->path_to_data_folder_ + "optFlowVectors.avi", codec, fps, first_frame_temp.size());
+    writer.open(this->path_to_data_folder_ + this->filename_ + "_opt_flow_vectors.avi", codec, fps, first_frame_temp.size());
     // check if the VideoWriter is correctly opened
     if (!writer.isOpened()) {
         cerr << "Could not open the output video file for write\n";
         return;
     }
 
+    boost::property_tree::ptree pt, pt_general;
+    int cpt = 1;
     // This while loop will be break at the end of the video
     while(1)
     {
@@ -317,9 +320,21 @@ void OptFlowVideo::write_vector_video(bool show_output, int fps)
             if( !status[i] )
                 continue;
             // Compute the vector of the optical flow between two frames
-            vector_flow = (points[1][i] - points[0][i])*20.0;
+            vector_flow.at(i) = (points[1][i] - points[0][i]);
             // Draw arrowed line the correct frame
-            arrowedLine(image, points[0][i],points[0][i] + vector_flow, Scalar(255,0,0),2);
+            arrowedLine(image, points[0][i],points[0][i] + vector_flow.at(i)*20.0, Scalar(255,0,0),2);
+        }
+
+        if(write_json_vector)
+        {
+            boost::property_tree::ptree frame,vectors;
+            for( i = 0; i < points[1].size(); i++ )
+            {
+                vectors.put("feature " + std::to_string(i+1),vector_flow.at(i));
+            }
+            frame.put("number", cpt);
+            frame.add_child("vectors", vectors);
+            pt_general.push_back(std::make_pair("", frame));
         }
 
         // Encode the frame into the videofile stream
@@ -336,17 +351,31 @@ void OptFlowVideo::write_vector_video(bool show_output, int fps)
         std::swap(points[1], points[0]);
         // Same thing for the gray frame
         cv::swap(prev_gray, gray);
+
+        cpt++;
+    }
+
+    if(write_json_vector)
+    {
+        pt.add_child("Frame", pt_general);
+        boost::property_tree::write_json(this->path_to_data_folder_ + this->filename_ + "_vectors.json", pt);
+    std::cout<<"JSON file of vectors of each features at each frames can be found at: "<<this->path_to_data_folder_ + this->filename_ + "_vectors.json"<<std::endl<<std::endl;
     }
 
     // Reload the video (the stream of the video is at the end so it's need to be reloaded if the user wants to use another function right after)
-    this->video_.open(this->filename_);
+    this->video_.open(this->filepath_);
     if (!this->video_.isOpened()) {
         std::cerr << "Failed to open the video device, video file or image sequence!\n" << std::endl;
         return;
     }
 
-    std::cout<<"Video with vector representing optical flow has been written at : "<<this->path_to_data_folder_<<"optFlowVectors.avi"<<std::endl<<std::endl;
+    std::cout<<"Video with vector representing optical flow has been written at : "<<this->path_to_data_folder_ + this->filename_ + "_opt_flow_vectors.avi"<<std::endl<<std::endl;
 }
+
+void OptFlowVideo::write_vector_json()
+{
+
+} 
 
 /* Function to release the video if it's no longer needed. The video is also released by the destructor of VideoCapture (public)
 *  Return:

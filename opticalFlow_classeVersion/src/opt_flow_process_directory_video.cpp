@@ -4,7 +4,7 @@ OptFlowProcessDirectoryVideo::OptFlowProcessDirectoryVideo(){}
 
 // Function to process all the videos that are all in the same folder
 // Parameters: path -> path to the folder, show_output (optional): show the results while running
-void OptFlowProcessDirectoryVideo::process_all_videos_folder(std::string path, bool show_output)
+void OptFlowProcessDirectoryVideo::process_all_videos_folder(std::string path, bool write_json_vector, bool show_output)
 {
     // Get the path to the dir
     boost::filesystem::path someDir(path);
@@ -27,13 +27,13 @@ void OptFlowProcessDirectoryVideo::process_all_videos_folder(std::string path, b
     for(int i = 0; i < result_set.size(); i++)
     {
         // Set the correct filename of the video in question
-        video_to_process.set_filename(result_set.at(i).string());
+        video_to_process.set_filepath(result_set.at(i).string());
         // Get the image with the features
         video_to_process.write_image_with_init_features(show_output);
         // Get the image with the optical flow
         video_to_process.write_image_with_optical_flow(show_output);
         // Get the video with the vector representing the optical flow
-        video_to_process.write_vector_video(show_output);
+        video_to_process.write_vector_video(write_json_vector,show_output);
         // Release the video at the end of the processing
         video_to_process.release_video();
     }

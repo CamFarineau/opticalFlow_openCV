@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 
 include(CMakeToolsHelpers OPTIONAL)
 
+set (CMAKE_CXX_STANDARD 11)
+
 project (opticalFlow_classVersion)
 
 find_package(OpenCV)
@@ -11,7 +13,7 @@ if(OpenCV_FOUND)
 endif(OpenCV_FOUND)
 
 
-find_package(Boost COMPONENTS filesystem) 
+find_package(Boost COMPONENTS filesystem)
 
 file(GLOB_RECURSE opticalFlow_classVersion_SOURCES "src/*.cpp")
 file(GLOB_RECURSE opticalFlow_classVersion_HEADERS "src/*.hpp")

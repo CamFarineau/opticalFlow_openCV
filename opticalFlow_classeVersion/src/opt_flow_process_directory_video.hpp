@@ -15,5 +15,5 @@ class OptFlowProcessDirectoryVideo{
     public:
     OptFlowProcessDirectoryVideo();
     // Function to process all the video that are contain in the same folder
-    void process_all_videos_folder(std::string path, bool show_output = false);
+    void process_all_videos_folder(std::string path, bool write_json_vector = true, bool show_output = false);
 };
