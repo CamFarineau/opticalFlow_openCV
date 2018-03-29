@@ -122,10 +122,9 @@ void OptFlowVideo::write_image_with_init_features(bool show_output)
     this->first_frame_.copyTo(first_frame_temp);
 
     // Add circle representing the features on the first frame of the video
-    int i = 0, k = 0;
-    for( i = k = 0; i < this->init_features_.size(); i++ )
+    int i = 0;
+    for( i = 0; i < this->init_features_.size(); i++ )
     {
-            this->init_features_[k++] = this->init_features_[i];
             circle( first_frame_temp, this->init_features_[i], 3, Scalar(0,255,0), -1, 8);
     }
 
@@ -200,7 +199,7 @@ void OptFlowVideo::write_image_with_optical_flow(bool show_output)
         calcOpticalFlowPyrLK(prev_gray, gray, points[0], points[1], status, err, this->win_size_, this->max_level_pyramids_, this->term_crit_, this->use_harris_detector_, 0.001);
 
         // For loop in order to draw the optical flow and features on the images
-        for( i = k = 0; i < points[1].size(); i++ )
+        for( i = 0; i < points[1].size(); i++ )
         {
             if( !status[i] )
                 continue;
@@ -271,7 +270,8 @@ void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, 
     // Tab of vector of Points2f : one for the previous location of the features, one for the newest
     vector<Point2f> points[2];
     // Points representing the vector between the new location of a feature and the old location
-    vector<Point2f> vector_flow(this->max_features_,Point2f(0.0,0.0)) ;
+    vector<vector<float>> vector_flow(2,vector<float>(this->max_features_,0.0f));
+    vector<vector<float>> vector_polar(2,vector<float>(this->max_features_,0.0f));
     // Get the location of the init features
     points[0] = this->init_features_;
 
@@ -290,7 +290,9 @@ void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, 
         return;
     }
 
+    // Create a property_tree that will contains the vectors for each frames
     boost::property_tree::ptree pt, pt_general;
+    // Counter to know which frame it's processing
     int cpt = 1;
     // This while loop will be break at the end of the video
     while(1)
@@ -320,20 +322,28 @@ void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, 
             if( !status[i] )
                 continue;
             // Compute the vector of the optical flow between two frames
-            vector_flow.at(i) = (points[1][i] - points[0][i]);
+            vector_flow.at(0).at(i) = (points[1][i].x - points[0][i].x);
+            vector_flow.at(1).at(i) = (points[1][i].y - points[0][i].y);
             // Draw arrowed line the correct frame
-            arrowedLine(image, points[0][i],points[0][i] + vector_flow.at(i)*20.0, Scalar(255,0,0),2);
+            arrowedLine(image, points[0][i],points[0][i] + Point2f(vector_flow[0][i],vector_flow[1][i])*20.0, Scalar(255,0,0),2);
         }
 
+        // If the user wants the json file
         if(write_json_vector)
         {
+            cartToPolar(vector_flow.at(0),vector_flow.at(1),vector_polar.at(0),vector_polar.at(1),false);
+            // Create a tree for each frame and vector
             boost::property_tree::ptree frame,vectors;
+            // Add for each feature it's vector for this particular frame
             for( i = 0; i < points[1].size(); i++ )
             {
-                vectors.put("feature " + std::to_string(i+1),vector_flow.at(i));
+                vectors.put("feature " + std::to_string(i+1),Point2f(vector_polar.at(0).at(i),vector_polar.at(1).at(i)));
             }
+            // Put the correct frame number
             frame.put("number", cpt);
+            // Add the vector has a child
             frame.add_child("vectors", vectors);
+            // Add this frame tree to the general tree
             pt_general.push_back(std::make_pair("", frame));
         }
 
@@ -357,9 +367,11 @@ void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, 
 
     if(write_json_vector)
     {
+        // Add the general tree to the main tree as a child
         pt.add_child("Frame", pt_general);
+        // Write the JSON at the correct location
         boost::property_tree::write_json(this->path_to_data_folder_ + this->filename_ + "_vectors.json", pt);
-    std::cout<<"JSON file of vectors of each features at each frames can be found at: "<<this->path_to_data_folder_ + this->filename_ + "_vectors.json"<<std::endl<<std::endl;
+        std::cout<<"JSON file of vectors of each features at each frames can be found at: "<<this->path_to_data_folder_ + this->filename_ + "_vectors.json"<<std::endl<<std::endl;
     }
 
     // Reload the video (the stream of the video is at the end so it's need to be reloaded if the user wants to use another function right after)
@@ -371,11 +383,6 @@ void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, 
 
     std::cout<<"Video with vector representing optical flow has been written at : "<<this->path_to_data_folder_ + this->filename_ + "_opt_flow_vectors.avi"<<std::endl<<std::endl;
 }
-
-void OptFlowVideo::write_vector_json()
-{
-
-} 
 
 /* Function to release the video if it's no longer needed. The video is also released by the destructor of VideoCapture (public)
 *  Return:

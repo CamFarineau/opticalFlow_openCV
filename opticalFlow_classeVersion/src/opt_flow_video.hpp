@@ -32,8 +32,6 @@ class OptFlowVideo{
         void write_image_with_optical_flow(bool show_output = false);
         // Function to get (write in a file) the same video with vectors representing the optical flow of each features at each frame
         void write_vector_video(bool write_json_vector = true, bool show_output = false, int fps = 25);
-        // Function to write in a JSON file the vectors of each features at each frames
-        void write_vector_json(); 
         // Function to release the video (deallocate memory)
         void release_video();
 
