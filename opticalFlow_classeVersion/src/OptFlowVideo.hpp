@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/videoio.hpp>
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <stdio.h>
 #include <ctype.h>
@@ -8,70 +9,92 @@
 
 using namespace std;
 using namespace cv;
+using namespace boost::filesystem;
 
-
+/* Class in order to get the optical flow of a video
+*/
 class OptFlowVideo{
     public:
 
-        // Parametized constructor can be created but initialize all parameters with the set functions would be better
+        // Default constructor
         OptFlowVideo();
-        OptFlowVideo(cv::String filenameTemp);
+        // Constructor with the filename as arguments can be useful
+        OptFlowVideo(string filename_temp);
 
-        // Function to load the video
-        // Return 0 if successful, 1 if not
-        int loadVideo();
+        // Function to get (write in a file) the first frame of the video with the important features that will be tracked
+        void write_image_with_init_features(bool show_output = false);
+        // Function to get (write in a file) the first frame of the video with the optical flow of each of the features
+        void write_image_with_optical_flow(bool show_output = false);
+        // Function to get (write in a file) the same video with vectors representing the optical flow of each features at each frame
+        void write_vector_video(bool show_output = false, int fps = 25);
+        // Function to release the video (deallocate memory)
+        void release_video();
 
-        void getImageWithInitFeatures(cv::String outputPath);
-        void getImageWithOpticalFlow(cv::String outputPath);
-        void getVectorVideo();
-        void releaseVideo();
+        // {get, set} for filename
+        void set_filename(string filename_temp);
+        string get_filename(){return filename_;};
 
-        void setFilename(string filenameTemp){filename = filenameTemp;};
-        string getFilename(){return filename;};
+        // {get, set} for max_features
+        void set_max_features(int max_features_temp){max_features_ = max_features_temp;};
+        int get_max_features(){return max_features_;};
 
-        void setMaxFeatures(int maxFeaturesTemp){maxFeatures = maxFeaturesTemp;};
-        int getMaxFeatures(){return maxFeatures;};
+        // {get, set} for quality_level
+        void set_quality_level(double quality_level_temp){quality_level_ = quality_level_temp;};
+        double get_quality_level(){return quality_level_;};
 
-        void setQualityLevel(double qualityLevelTemp){qualityLevel = qualityLevelTemp;};
-        double getQualityLevel(){return qualityLevel;};
+        // {get, set} for min_distance
+        void set_min_distance(double min_distance_temp){min_distance_ = min_distance_temp;};
+        double get_min_distance(){return min_distance_;};
 
-        void setMinDistance(double minDistanceTemp){minDistance = minDistanceTemp;};
-        double getMinDistance(){return minDistance;};
+        // {get, set} for block_size
+        void set_block_size(int block_size_temp){block_size_ = block_size_temp;};
+        int get_block_size(){return block_size_;};
 
-        void setBlockSize(int blockSizeTemp){blockSize = blockSizeTemp;};
-        int getBlockSize(){return blockSize;};
+        // {get, set} for use_harris_detector
+        void set_use_harris_detector(bool _use_harris_detector_temp){use_harris_detector_ = _use_harris_detector_temp;};
+        bool get_use_harris_detector(){return use_harris_detector_;};
+        
+        // {get, set} for win_size_
+        void set_win_size(Size win_size_temp){win_size_ = win_size_temp;};
+        Size get_win_size(){return win_size_;};
 
-        void setUseHarrisDetector(bool useHarrisDetectorTemp){useHarrisDetector = useHarrisDetectorTemp;};
-        bool getUseHarrisDetector(){return useHarrisDetector;};
-
-        void setWinSize(Size winSizeTemp){winSize = winSizeTemp;};
-        Size getWinSize(){return winSize;};
-
-        void setMaxLevelPyramids(int maxLevelPyramidsTemp){maxLevelPyramids = maxLevelPyramidsTemp;};
-        int getMaxLevelPyramids(){return maxLevelPyramids;};
+        // {get, set} for max_level_pyramids_
+        void setmax_level_pyramids(int max_level_pyramids_temp){max_level_pyramids_ = max_level_pyramids_temp;};
+        int getmax_level_pyramids(){return max_level_pyramids_;};
 
     private:
-        //Video
-        cv::String filename;
-        VideoCapture video;
-        Mat firstFrame;
 
-        //Features
-        vector<Point2f> initFeatures;
+        //Video attributs:
+        cv::String filename_;
+        // Boolean to know if the video change (in case of true the new video will be loaded in order to proces it)
+        bool change_name_;
+        // The video itself
+        VideoCapture video_;
+        // first frame of the video
+        Mat first_frame_;
 
-        //Features parameters
-        int maxFeatures;
-        double qualityLevel;
-        double minDistance;
-        int blockSize;
-        bool useHarrisDetector;
+        string path_to_data_folder_;
 
-        //OpticalFlow with LK alg parameters
-        TermCriteria termcrit;
-        Size winSize;
-        int maxLevelPyramids;
+        //Features: vector of Point2f
+        vector<Point2f> init_features_;
+
+        //goodFeaturesToTrack parameters
+        int max_features_;
+        double quality_level_;
+        double min_distance_;
+        int block_size_;
+        bool use_harris_detector_;
+
+        //calcOpticalFlowPyrLK parameters
+        TermCriteria term_crit_;
+        Size win_size_;
+        int max_level_pyramids_;
 
         // Get the initial features
         // All the parameters need to be initialized
-        int searchInitFeatures();
+        int search_init_features();
+        
+        // Function to load the video
+        // Return 0 if successful, 1 if not
+        int load_video();
 };

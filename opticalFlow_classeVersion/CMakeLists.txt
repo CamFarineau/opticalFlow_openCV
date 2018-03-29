@@ -10,6 +10,9 @@ if(OpenCV_FOUND)
    message("Includes: " ${OpenCV_LIBS})
 endif(OpenCV_FOUND)
 
+
+find_package(Boost COMPONENTS filesystem) 
+
 file(GLOB_RECURSE opticalFlow_classVersion_SOURCES "src/*.cpp")
 file(GLOB_RECURSE opticalFlow_classVersion_HEADERS "src/*.hpp")
 
@@ -21,5 +24,5 @@ endforeach()
 list(REMOVE_DUPLICATES opticalFlow_classVersion_INCLUDE_DIRS)
 
 add_executable(opticalFlow_classVersion ${opticalFlow_classVersion_SOURCES})
-target_include_directories(opticalFlow_classVersion PRIVATE ${opticalFlow_classVersion_INCLUDE_DIRS})
-target_link_libraries(opticalFlow_classVersion ${OpenCV_LIBS})
+target_include_directories(opticalFlow_classVersion PRIVATE ${opticalFlow_classVersion_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+target_link_libraries(opticalFlow_classVersion ${OpenCV_LIBS} ${Boost_LIBRARIES})

@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     /* initialize random seed: */
   srand (time(NULL));
     
-    cv::VideoCapture vid("/home/camille/work/opticalFlow_test/opticalFlow_openCV/data/slow.mp4");
+    cv::VideoCapture vid("/home/camille/work/opticalFlow_openCV/firstVersion/data/slow.mp4");
     //vid.open("/home/camille/work/opticalFlow_test/opticalFlow_openCV/data/flow.mp4");
     if (!vid.isOpened()) {
         std::cerr << "Failed to open the video device, video file or image sequence!\n" << std::endl;
@@ -25,11 +25,11 @@ int main(int argc, char** argv)
 
     //Parameters for the calcOpticalFlowPyrLK function
     TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS,10,0.03);
-    Size  winSize(100,100);
+    Size  winSize(15,15);
     const int max = 20;
 
     // Parameter for the goodFeaturesToTrack function
-    int maxLevel = 5;
+    int maxLevel = 3;
 
     Mat gray, prevGray, image, frame, mask;
     vector<Point2f> points[2];
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     int i = 0, k = 0;
 
     // Others parameters are hard-coded in the call
-    goodFeaturesToTrack(gray, points[1], max, 0.01, 10, Mat(), 3, 3, 0, 0.04);
+    goodFeaturesToTrack(gray, points[1], max, 0.9, 10, Mat(), 3, 3, 0, 0.04);
 
     // TO GET THE IMAGE OF THE DETECTED FEATURES
     // for( i = k = 0; i < points[1].size(); i++ )
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
         }
         //std::cout<<"Points[1]: "<<points[1]<<std::endl;
         imshow("test", image);
-        char c = (char)waitKey(100);
+        char c = (char)waitKey(10);
         if( c == 27 )
             break;
 
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
     waitKey(10);
 
 
-    imwrite( "/home/camille/work/opticalFlow_test/opticalFlow_openCV/data/winSize30x30.jpg", mask );
+    imwrite( "/home/camille/work/opticalFlow_openCV/firstVersion/data/TESTqualityLevel09.jpg", mask );
 
 
     vid.release();
