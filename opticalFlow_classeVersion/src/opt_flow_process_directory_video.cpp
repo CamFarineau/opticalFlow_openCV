@@ -1,4 +1,4 @@
-#include "OptFlowProcessDirectoryVideo.hpp"
+#include "opt_flow_process_directory_video.hpp"
 
 OptFlowProcessDirectoryVideo::OptFlowProcessDirectoryVideo(){}
 

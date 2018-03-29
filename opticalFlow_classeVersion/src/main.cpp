@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdio.h>
-#include "OptFlowProcessDirectoryVideo.hpp"
+#include "opt_flow_process_directory_video.hpp"
 
 using namespace std;
 

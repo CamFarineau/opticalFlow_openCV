@@ -12,6 +12,8 @@ using namespace cv;
 using namespace boost::filesystem;
 
 /* Class in order to get the optical flow of a video
+*  A single video ca be processed with this class. Give it the filename (path to the video) and parameters and call the needed functions
+*  If you want to process a lot of videos, put them together in the same folder and use the OptFlowProcessDirectoryVideo class
 */
 class OptFlowVideo{
     public:

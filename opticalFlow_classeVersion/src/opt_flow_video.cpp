@@ -1,4 +1,4 @@
-#include "OptFlowVideo.hpp"
+#include "opt_flow_video.hpp"
 
 // Constructors initialize all the parameters in order to calculate the optical flow
 // Each parameters can be set separately by the user

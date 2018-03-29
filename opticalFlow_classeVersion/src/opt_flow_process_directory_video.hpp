@@ -1,5 +1,5 @@
 #include <boost/filesystem.hpp>
-#include "OptFlowVideo.hpp"
+#include "opt_flow_video.hpp"
 #include <iostream>
 #include <stdio.h>
 
@@ -7,7 +7,9 @@ using namespace std;
 using namespace boost::filesystem;
 
 /* Class to process videos (get opt flow) that are all in the same folder
-*/
+*  Inconvenient: all videos will be processed with the same parameters for the optical flow.
+*  It is possible to implement a way to read parameter out of json file for example.
+*/ 
 class OptFlowProcessDirectoryVideo{
     
     public:
