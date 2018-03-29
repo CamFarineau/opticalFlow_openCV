@@ -6,9 +6,12 @@
 using namespace std;
 using namespace boost::filesystem;
 
-class ProcessDirectoryVideo{
+/* Class to process videos (get opt flow) that are all in the same folder
+*/
+class OptFlowProcessDirectoryVideo{
     
     public:
-    ProcessDirectoryVideo();
+    OptFlowProcessDirectoryVideo();
+    // Function to process all the video that are contain in the same folder
     void process_all_videos_folder(std::string path, bool show_output = false);
 };
