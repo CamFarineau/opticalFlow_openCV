@@ -18,6 +18,12 @@ void Gui::set_parameters()
     this->directory.process_all_videos_folder(this->path_box.caption());
 }
 
+void Gui::execute()
+{
+    this->fm.show();
+    exec();
+}
+
 void Gui::init_gui()
  {  
     this->fm.size(size(500,500));
@@ -76,6 +82,4 @@ void Gui::init_gui()
     this->layout.field("button_quit") << this->btn_quit;
     this->layout.collocate();
 
-    this->fm.show();
-    exec();
  }

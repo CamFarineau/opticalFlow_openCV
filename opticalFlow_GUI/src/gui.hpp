@@ -19,6 +19,7 @@ class Gui{
 
     Gui();
     void init_gui();
+    void execute();
 
 
     private:

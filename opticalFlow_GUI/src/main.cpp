@@ -8,10 +8,6 @@
 
 using namespace std;
 
-
-
-
-
 int main(int argc, char** argv)
 {
     // Version to test one video at the time
@@ -33,6 +29,7 @@ int main(int argc, char** argv)
 
     Gui gui;
     gui.init_gui();
+    gui.execute();
 
     return 0;
 }
