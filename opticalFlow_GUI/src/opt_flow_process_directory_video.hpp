@@ -3,6 +3,7 @@
 
 #include <boost/filesystem.hpp>
 #include "opt_flow_video.hpp"
+#include "opt_flow_frame.hpp"
 #include <iostream>
 #include <stdio.h>
 
@@ -21,6 +22,8 @@ class OptFlowProcessDirectoryVideo{
     void process_all_videos_folder(std::string path, bool write_json_vector = true, bool show_output = false);
     // Create an OptFlowVideo
     OptFlowVideo video_to_process;
+    // Create an OptFlowFrames
+    OptFlowFrame directory_frame_to_process;
 };
 
 #endif
