@@ -30,7 +30,6 @@ void OptFlowProcessDirectoryVideo::process_all_videos_folder(std::string path, b
         {
             if(boost::filesystem::is_directory(dir_iter->path()))
             {
-                std::cout<<"Directory: "<<dir_iter->path().string()<<std::endl;
                 frames_set.push_back(dir_iter->path());
             }
             else
@@ -51,6 +50,7 @@ void OptFlowProcessDirectoryVideo::process_all_videos_folder(std::string path, b
         // For each video in the folder, process everything
         for(int i = 0; i < videos_set.size(); i++)
         {
+            std::cout<<"Processing video: "<<videos_set.at(i).string()<<std::endl<<std::endl;
             // Set the correct filename of the video in question
             this->video_to_process.set_filepath(videos_set.at(i).string());
             // Get the image with the features
@@ -61,11 +61,13 @@ void OptFlowProcessDirectoryVideo::process_all_videos_folder(std::string path, b
             this->video_to_process.write_vector_video(write_json_vector,show_output);
             // Release the video at the end of the processing
             this->video_to_process.release_video();
+            std::cout<<"**********************************************************************"<<std::endl;
         }
 
         // For each directory contening frames in the folder, process everything
         for(int j = 0; j < frames_set.size(); j++)
         {
+            std::cout<<"Processing directory of frames: "<<frames_set.at(j).string()<<std::endl<<std::endl;
             // Set the correct directory path
             this->directory_frame_to_process.set_directory_path(frames_set.at(j).string());
             // Get the first frame with the initial features
@@ -76,11 +78,12 @@ void OptFlowProcessDirectoryVideo::process_all_videos_folder(std::string path, b
             this->directory_frame_to_process.write_vector_video(write_json_vector,show_output);
             // Release the frames from the vector at the end of the processing
             this->directory_frame_to_process.release_vector_frames();
+            std::cout<<"**********************************************************************"<<std::endl;
             
         }
         
         std::cout<<"**********************************************************************"<<std::endl;
-        std::cout<<"All videos of: "<<video_dir.string()<<" have been processed !"<<std::endl;
+        std::cout<<"All videos / frames of: "<<video_dir.string()<<" have been processed !"<<std::endl;
         std::cout<<"**********************************************************************"<<std::endl;
 
     }

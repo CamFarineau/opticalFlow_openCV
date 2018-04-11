@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string> 
+#include <algorithm>
 
 using namespace std;
 using namespace cv;

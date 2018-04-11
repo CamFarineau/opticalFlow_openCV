@@ -30,33 +30,11 @@ OptFlowFrame::OptFlowFrame(string directory_path_temp)
     this->term_crit_ = TermCriteria(TermCriteria::COUNT|TermCriteria::EPS,10,0.03);
 }
 
-// bool is_not_digit(char c)
-// {
-//     return !std::isdigit(c);
-// }
-
-// bool numeric_string_compare(const std::string& s1, const std::string& s2)
-// {
-//     // handle empty strings...
-
-//     std::string::const_iterator it1 = s1.begin(), it2 = s2.begin();
-
-//     if (std::isdigit(s1[0]) && std::isdigit(s2[0])) {
-//         int n1, n2;
-//         std::stringstream ss(s1);
-//         ss >> n1;
-//         ss.clear();
-//         ss.str(s2);
-//         ss >> n2;
-
-//         if (n1 != n2) return n1 < n2;
-
-//         it1 = std::find_if(s1.begin(), s1.end(), is_not_digit);
-//         it2 = std::find_if(s2.begin(), s2.end(), is_not_digit);
-//     }
-
-//     return std::lexicographical_compare(it1, s1.end(), it2, s2.end());
-// }
+bool numeric_string_compare(const std::string& s1,const std::string& s2)
+{
+    int num1 = std::stoi(s1), num2 = std::stoi(s2);
+    return (num1<num2);
+}
 
 void OptFlowFrame::set_directory_path(string directory_path_temp)
 {
@@ -79,23 +57,24 @@ int OptFlowFrame::load_frames()
         {
             boost::filesystem::directory_iterator end_iter;
             // Vector of path that will contains all path to the of frames. Necessary because it will get the frame not sorted
-            vector<boost::filesystem::path> frames_set;
+            vector<int> num_frames_set;
             Mat image_temp;
+            string extension, complete_path, temp_num_frame;
             // Go through all the files in the folder
             for( boost::filesystem::directory_iterator dir_iter(frames_dir) ; dir_iter != end_iter ; ++dir_iter)
             {
                 // Insert the path of each frames into the vector of path
-                frames_set.push_back(dir_iter->path());
+                num_frames_set.push_back(std::stoi(dir_iter->path().stem().string()));
+                extension = boost::filesystem::extension(dir_iter->path());
             }
-            std::sort(frames_set.begin(), frames_set.end());
-
-            for(int i; i < frames_set.size(); i++ )
+            std::sort(num_frames_set.begin(), num_frames_set.end());
+            for(int i=0; i < num_frames_set.size(); i++ )
             {
-                image_temp = imread(frames_set.at(i).string(), CV_LOAD_IMAGE_COLOR);   // Read the file
-                std::cout<<"Path: "<<frames_set.at(i).string()<<std::endl;
+                complete_path = this->directory_path_ + "/" + std::to_string(num_frames_set.at(i)) + extension;
+                image_temp = imread(complete_path, CV_LOAD_IMAGE_COLOR);   // Read the file
                 if(! image_temp.data )  // Check for invalid input
                 {
-                    cout <<  "Could not open or find the image: " << frames_set.at(i).string() << std::endl ;
+                    cout <<  "Could not open or find the image: " << this->directory_path_ << "/" << num_frames_set.at(i) << std::endl ;
                     return 1;
                 }
                 else
