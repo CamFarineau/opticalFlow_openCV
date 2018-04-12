@@ -164,6 +164,7 @@ void OptFlowVideo::write_image_with_optical_flow(bool show_output)
 
     // Get the first frame of the video
     this->first_frame_.copyTo(first_frame_temp);
+    this->first_frame_.copyTo(image);
 
     // tab of vector of Points2f : one for the previous location of the features, one for the newest
     vector<Point2f> points[2];
@@ -186,8 +187,7 @@ void OptFlowVideo::write_image_with_optical_flow(bool show_output)
             break;
         
         // Get the gray image
-        frame.copyTo(image);
-        cvtColor(image, gray, COLOR_BGR2GRAY);
+        cvtColor(frame, gray, COLOR_BGR2GRAY);
 
         // Initialisation for the gray images
         if(prev_gray.empty())
@@ -198,7 +198,7 @@ void OptFlowVideo::write_image_with_optical_flow(bool show_output)
         vector<uchar> status;
         vector<float> err;
         calcOpticalFlowPyrLK(prev_gray, gray, points[0], points[1], status, err, this->win_size_, this->max_level_pyramids_, this->term_crit_, this->use_harris_detector_, 0.001);
-
+        std::cout<<"size: "<<points[1].size()<<std::endl;
         // For loop in order to draw the optical flow and features on the images
         for( i = 0; i < points[1].size(); i++ )
         {
@@ -213,7 +213,7 @@ void OptFlowVideo::write_image_with_optical_flow(bool show_output)
         // If the user wants to see the output (position of the features at each frame) while running
         if(show_output)
         {
-            imshow("Video with Features", image);
+            imshow("Video with Features", first_frame_temp);
             char c = (char)waitKey(10);
             if( c == 27 )
                 break;
@@ -223,6 +223,7 @@ void OptFlowVideo::write_image_with_optical_flow(bool show_output)
         std::swap(points[1], points[0]);
         // Same thing for the frames
         cv::swap(prev_gray, gray);
+        frame.copyTo(image);
     }
 
     // If the user wants to see the output (first frame with optical flow for each feature) while running
@@ -267,7 +268,7 @@ void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, 
     Mat first_frame_temp, frame, image, gray, prev_gray;
     // Get the first frame of the image
     this->first_frame_.copyTo(first_frame_temp);
-
+    this->first_frame_.copyTo(image);
     // Tab of vector of Points2f : one for the previous location of the features, one for the newest
     vector<Point2f> points[2];
     // Points representing the vector between the new location of a feature and the old location
@@ -305,8 +306,7 @@ void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, 
             break;
         
         // Get the gray scale image
-        frame.copyTo(image);
-        cvtColor(image, gray, COLOR_BGR2GRAY);
+        cvtColor(frame, gray, COLOR_BGR2GRAY);
 
         // Initialisation of the gray scales images
         if(prev_gray.empty())
@@ -362,6 +362,8 @@ void OptFlowVideo::write_vector_video(bool write_json_vector, bool show_output, 
         std::swap(points[1], points[0]);
         // Same thing for the gray frame
         cv::swap(prev_gray, gray);
+
+        frame.copyTo(image);
 
         cpt++;
     }
